@@ -1,5 +1,6 @@
 package gameoflife
 
+import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 
@@ -27,47 +28,34 @@ import org.junit.Test
  */
 class GameOfLifeTest {
 
-    val gameOfLife = GameOfLife(arrayOf(arrayOf(true, true, false, true)))
+    private lateinit var gameOfLife: GameOfLife
+    val board: Array<Array<Boolean>> = arrayOf(arrayOf(), arrayOf(), arrayOf(), arrayOf(), arrayOf(), arrayOf(),
+        arrayOf(), arrayOf())
 
     @Before
     fun setUp() {
-    }
+        for (i in 0 until 8) {
+            board[i] = arrayOf(false, false, false, false, false, false, false, false)
+        }
 
-
-    /**
-     * Test that the setup method of the board
-     * can setup boards of any combination of rows and columns
-     */
-    @Test
-    fun `board can have any number of rows and columns`() {
-
+        gameOfLife = GameOfLife(board)
     }
 
     /**
-     * Test that iterating though a cells neighbours checks all
-     * the cells around it without any index out of bounds exceptions
-     * Cases: Normal cell, edge cell, corner cell
+     * Checks that getLiveNeighbourCount() counts the correct number of live neighbours
+     * and doesn't crash
      */
     @Test
-    fun `iterates through neighbours without going out of bounds`() {
+    fun `getLiveNeighbourCount returns the correct number of live neighbours`() {
 
-    }
+        val x = 5
+        val y = 5
 
-    /**
-     * Checks that the neighbours a cell checks are its actual neighbours
-     * and not any other cell
-     */
-    @Test
-    fun `iterates through all the correct neighbours`() {
+        board[x - 1][y - 1] = true
+        board[x][y - 1] = true
+        board[x + 1][y] = true
 
-    }
-
-    /**
-     * Check that every cell is iterated through every tick
-     */
-    @Test
-    fun `iterates through all the cells`() {
-
+        assertEquals(3, gameOfLife.getLiveNeighbourCount(x, y))
     }
 
     /**
@@ -84,8 +72,14 @@ class GameOfLifeTest {
      */
     @Test
     fun `check if cell will die with less than two neighbours`(){
-        val cellState = gameOfLife.checkCellHasLessThanTwoNeighbours(0)
-        assert(cellState)
+
+        val x = 5
+        val y = 5
+
+        board[x - 1][y - 1] = true
+
+        val cellState = gameOfLife.getNextGenState(x, y)
+        assertEquals(false, cellState)
     }
 
     /**
@@ -93,17 +87,37 @@ class GameOfLifeTest {
      */
     @Test
     fun `check if cell will die with more than 3 neighbours`(){
-        val cellState = gameOfLife.checkCellHasMoreThanThreeNeighbours(0)
-        assert(cellState)
+        val x = 5
+        val y = 5
+
+        board[x - 1][y - 1] = true
+        board[x][y - 1] = true
+        board[x + 1][y - 1] = true
+        board[x - 1][y] = true
+
+        val cellState = gameOfLife.getNextGenState(x, y)
+        assertEquals(false, cellState)
     }
 
     /**
-     * Check if cell will survive for the next generation with 2 or 3 live neighbours
+     * Check if cell will remain the same for the next generation with 2 live neighbours
      */
     @Test
-    fun `check if cell will survive for the next generation with 2 or 3 live neighbours`(){
-        val cellState = gameOfLife.checkDeadCellHasThreeNeighbours(0)
-        assert(cellState)
+    fun `check if cell will remain the same for the next generation with 2 live neighbours`(){
+        val x = 5
+        val y = 5
+
+        board[x][y] = false
+        board[x - 1][y - 1] = true
+        board[x][y - 1] = true
+
+        var cellState = gameOfLife.getNextGenState(x, y)
+        assertEquals(false, cellState)
+
+        board[x][y] = true
+        cellState = gameOfLife.getNextGenState(x, y)
+        assertEquals(true, cellState)
     }
+
 
 }
